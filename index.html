@@ -135,10 +135,10 @@ tr.row-inservice:hover{background:#f3eeff!important}
 .is-section{margin-bottom:14px}
 .is-section-label{font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
 .is-svc-checks{display:flex;flex-direction:column;gap:8px}
-.is-svc-check{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;user-select:none}
+.is-svc-check{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;transition:all .15s}
 .is-svc-check:hover{border-color:#c4b5fd;background:var(--purple-bg)}
 .is-svc-check.checked{border-color:#c4b5fd;background:var(--purple-bg)}
-.is-svc-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--purple);cursor:pointer;flex-shrink:0}
+.is-svc-check input[type=checkbox]{width:18px;height:18px;accent-color:var(--purple);cursor:pointer;flex-shrink:0;pointer-events:auto}
 .is-svc-check-label{flex:1;font-size:14px;pointer-events:none}
 .is-svc-icon{font-size:16px}
 .is-note-input{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;resize:none;min-height:65px}
@@ -606,7 +606,7 @@ function renderTable(){
     const{entry:urgEntry}=getMostUrgent(c);
     const nextDue=(!c.inService&&urgEntry)?fmt(getNextForEntry(urgEntry)):'—';
     const isBtn=c.inService
-      ? '<button class="icon-btn orange" title="Close case / done" onclick="openISModal(\''+c.id+'\')" style="width:auto;padding:0 8px;gap:5px;font-size:11px;font-weight:600"><svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><polyline points=\'20 6 9 17 4 12\'/></svg>Close Case</button>'
+      ? '<button class="icon-btn orange" title="🏁 Close &amp; Done / done" onclick="openISModal(\''+c.id+'\')" style="width:auto;padding:0 8px;gap:5px;font-size:11px;font-weight:600"><svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><polyline points=\'20 6 9 17 4 12\'/></svg>🏁 Close &amp; Done</button>'
       : '<button class="icon-btn purple" title="Mark as In Service" onclick="openISModal(\''+c.id+'\')" style="width:auto;padding:0 8px;gap:5px;font-size:11px;font-weight:600"><svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><circle cx=\'12\' cy=\'12\' r=\'3\'/><path d=\'M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M21 12h-2M5 12H3M18.66 18.66l-1.41-1.41M6.34 5.34L4.93 4.93\'/></svg>In Service</button>';
     return'<tr'+(c.inService?' class="row-inservice"':'')+'>'
       +'<td><strong>'+c.name+'</strong>'+(c.vehicle?'<br><span style="font-size:12px;color:var(--text3)">'+c.vehicle+'</span>':'')+'</td>'
@@ -639,7 +639,7 @@ function openISModal(id){
 
   if(c.inService){
     // CLOSE CASE mode
-    document.getElementById('is-modal-title').textContent='✅ Close Case';
+    document.getElementById('is-modal-title').textContent='✅ 🏁 Close &amp; Done';
     document.getElementById('is-svc-label').textContent='Services completed (check all done today)';
     closeInfo.style.display='block';
     checks.innerHTML=entries.map((e,i)=>{
@@ -651,7 +651,7 @@ function openISModal(id){
         +'</label>';
     }).join('');
     footer.innerHTML='<button class="btn btn-ghost" onclick="closeISModal()">Cancel</button>'
-      +'<button class="btn btn-primary" onclick="closeCase()">&#10003; Close Case &amp; Update Dates</button>';
+      +'<button class="btn btn-primary" onclick="closeCase()">🏁 Close &amp; Done</button>';
     initISChecks();
   }else{
     // IN SERVICE mode
@@ -660,7 +660,7 @@ function openISModal(id){
     closeInfo.style.display='none';
     checks.innerHTML=entries.map((e,i)=>{
       const d=getSvcDef(e.name);
-      return'<label class="is-svc-check" onclick="toggleCheck(this)">'
+      return'<label class="is-svc-check">'
         +'<input type="checkbox" data-idx="'+i+'">'
         +'<span class="is-svc-icon">'+(d?d.icon:'🔧')+'</span>'
         +'<span class="is-svc-check-label">'+e.name+'</span>'
@@ -674,19 +674,16 @@ function openISModal(id){
 }
 
 function toggleCheck(label){
-  // called only when clicking label background, not the checkbox itself
   const cb=label.querySelector('input[type=checkbox]');
   cb.checked=!cb.checked;
   label.classList.toggle('checked',cb.checked);
 }
 function initISChecks(){
   document.querySelectorAll('#is-svc-checks input[type=checkbox]').forEach(function(cb){
-    // sync class on every change (works for click, keyboard, etc.)
     cb.addEventListener('change',function(){
-      cb.closest('.is-svc-check').classList.toggle('checked', cb.checked);
+      cb.closest('.is-svc-check').classList.toggle('checked',cb.checked);
     });
-    // set initial state
-    cb.closest('.is-svc-check').classList.toggle('checked', cb.checked);
+    cb.closest('.is-svc-check').classList.toggle('checked',cb.checked);
   });
 }
 
@@ -742,7 +739,7 @@ function buildSegCard(c,col){
     else{const nd=urgEntry?getNextForEntry(urgEntry):null;dlabel='<div class="seg-dayslabel '+col+'">Due in '+days+' days &mdash; '+fmt(nd)+'</div>';}
   }
   const actionBtn=c.inService
-    ?'<button class="btn btn-secondary btn-sm" onclick="openISModal(\''+c.id+'\')">&#10003; Close Case</button>'
+    ?'<button class="btn btn-secondary btn-sm" onclick="openISModal(\''+c.id+'\')">🏁 Close &amp; Done</button>'
     :'<button class="btn btn-secondary btn-sm" onclick="openISModal(\''+c.id+'\')">In Service</button>';
   return'<div class="seg-card'+(c.inService?' is-inservice':'')+'"><div class="seg-stripe '+col+'"></div><div class="seg-body">'
     +'<div class="seg-avatar">'+initials(c.name)+'</div>'
