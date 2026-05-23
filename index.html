@@ -218,7 +218,18 @@ tr.row-inservice:hover{background:#f3eeff!important}
 .toast{position:fixed;bottom:24px;right:24px;background:#111;color:white;padding:12px 18px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;z-index:200;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:var(--shadow-md);border-left:3px solid var(--brand)}
 .toast.show{transform:translateY(0);opacity:1}
 
-@media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.stats{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}.svc-row{grid-template-columns:1fr auto}}
+/* ===== HISTORY ===== */
+.hist-empty{text-align:center;padding:32px 16px;color:var(--text3);font-size:14px}
+.hist-visit{border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden}
+.hist-visit-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.hist-visit-date{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px}
+.hist-visit-body{padding:10px 14px}
+.hist-visit-svcs{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px}
+.hist-visit-note{font-size:13px;color:var(--text2);font-style:italic}
+.hist-icon-btn{width:26px;height:26px;border-radius:5px;border:1px solid #fca5a5;background:var(--red-bg);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--red);transition:all .15s}
+.hist-icon-btn:hover{background:var(--red);color:white}
+.hist-icon-btn svg{width:12px;height:12px}
+.app{grid-template-columns:1fr}.sidebar{display:none}.stats{grid-template-columns:repeat(2,1fr)}.form-row{grid-template-columns:1fr}.svc-row{grid-template-columns:1fr auto}}
 </style>
 </head>
 <body>
@@ -454,6 +465,23 @@ tr.row-inservice:hover{background:#f3eeff!important}
   </div>
 </div>
 
+<!-- HISTORY MODAL -->
+<div class="modal-overlay" id="hist-modal-overlay" onclick="closeHistOverlay(event)">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="hist-title">Visit History</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:2px" id="hist-sub"></div>
+      </div>
+      <button class="modal-close" onclick="closeHistModal()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body" id="hist-body" style="padding-bottom:8px"></div>
+    <div class="modal-footer" style="justify-content:flex-start">
+      <button class="btn btn-ghost" onclick="closeHistModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -616,6 +644,7 @@ function renderTable(){
       +'<td>'+statusBadge(c)+'</td>'
       +'<td style="color:var(--text2)">'+nextDue+'</td>'
       +'<td><div class="action-btns" style="justify-content:flex-end">'+isBtn
+      +'<button class="icon-btn" onclick="openHistModal(\''+c.id+'\')" title="Visit History" style="font-size:14px">📋</button>'
       +'<button class="icon-btn" onclick="editClient(\''+c.id+'\')" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
       +'<button class="icon-btn danger" onclick="deleteClient(\''+c.id+'\')" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg></button>'
       +'</div></td></tr>';
@@ -639,7 +668,7 @@ function openISModal(id){
 
   if(c.inService){
     // CLOSE CASE mode
-    document.getElementById('is-modal-title').textContent='✅ 🏁 Close &amp; Done';
+    document.getElementById('is-modal-title').textContent='🏁 Close & Done';
     document.getElementById('is-svc-label').textContent='Services completed (check all done today)';
     closeInfo.style.display='block';
     checks.innerHTML=entries.map((e,i)=>{
@@ -702,11 +731,15 @@ function closeCase(){
   const today=todayStr();
   const checks=[...document.querySelectorAll('#is-svc-checks input[type=checkbox]')];
   const entries=getClientEntries(c);
+  const completedServices=[];
   // Update date for checked services
   checks.forEach(cb=>{
     if(cb.checked){
       const idx=parseInt(cb.dataset.idx);
-      if(entries[idx])entries[idx].date=today;
+      if(entries[idx]){
+        entries[idx].date=today;
+        completedServices.push(entries[idx].name);
+      }
     }
   });
   c.services=entries;
@@ -715,8 +748,55 @@ function closeCase(){
   delete c.inServiceNote;
   const note=document.getElementById('is-note').value.trim();
   if(note)c.notes=(c.notes?c.notes+'\n'+today+': '+note:today+': '+note);
+  // ── Save to visit history ──
+  if(!c.visits)c.visits=[];
+  c.visits.unshift({
+    date:today,
+    services:completedServices,
+    note:note||''
+  });
   save(clients);closeISModal();renderAll();
-  showToast('Case closed — service dates updated ✓');
+  showToast('🏁 Done! Visit recorded in history ✓');
+}
+
+// ── History Modal ──────────────────────────────────────────────────────────────
+function openHistModal(id){
+  const c=clients.find(x=>x.id===id);if(!c)return;
+  document.getElementById('hist-title').textContent='📋 '+c.name;
+  document.getElementById('hist-sub').textContent=(c.vehicle||'')+' · '+c.phone;
+  const visits=c.visits||[];
+  const body=document.getElementById('hist-body');
+  if(!visits.length){
+    body.innerHTML='<div class="hist-empty">No visits recorded yet.<br>Visits are saved automatically when you close a service.</div>';
+  }else{
+    body.innerHTML=visits.map((v,vi)=>{
+      const chips=(v.services||[]).map(s=>{
+        const d=getSvcDef(s);
+        return'<span class="svc-chip">'+(d?d.icon:'🔧')+' '+s+'</span>';
+      }).join('');
+      return'<div class="hist-visit">'
+        +'<div class="hist-visit-header">'
+        +'<div class="hist-visit-date">'+fmt(v.date)+'</div>'
+        +'<button class="hist-icon-btn" onclick="deleteVisit(\''+id+'\','+vi+')" title="Delete visit">'
+        +'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>'
+        +'</div>'
+        +'<div class="hist-visit-body">'
+        +(chips?'<div class="hist-visit-svcs">'+chips+'</div>':'<div style="font-size:13px;color:var(--text3)">No services recorded</div>')
+        +(v.note?'<div class="hist-visit-note">📝 '+v.note+'</div>':'')
+        +'</div></div>';
+    }).join('');
+  }
+  document.getElementById('hist-modal-overlay').classList.add('open');
+}
+function closeHistModal(){document.getElementById('hist-modal-overlay').classList.remove('open');}
+function closeHistOverlay(e){if(e.target===document.getElementById('hist-modal-overlay'))closeHistModal();}
+function deleteVisit(clientId,visitIdx){
+  if(!confirm('Delete this visit record?'))return;
+  const c=clients.find(x=>x.id===clientId);if(!c||!c.visits)return;
+  c.visits.splice(visitIdx,1);
+  save(clients);
+  openHistModal(clientId); // refresh modal
+  showToast('Visit deleted');
 }
 
 function closeISModal(){document.getElementById('is-modal-overlay').classList.remove('open');}
