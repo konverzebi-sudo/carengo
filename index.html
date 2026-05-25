@@ -804,28 +804,30 @@ function showView(v){
 
 // CSV Export
 function exportCSV(){
-  var headers=['ID','Name','Phone','Vehicle','Notes','Services','Dates','InService','Visits','CreatedAt'];
+  function q(s){return '"'+String(s||'').replace(/"/g,'""')+'"';}
+  var headers='ID,Name,Phone,Vehicle,Notes,Services,Dates,InService,Visits,CreatedAt';
   var rows=clients.map(function(c){
     var entries=getEntries(c);
-    var visits=JSON.stringify(c.visits||[]).replace(/"/g,'""');
-    return[c.id,'"'+(c.name||'').replace(/"/g,'""')+'"','"'+(c.phone||'').replace(/"/g,'""')+'"',
-      '"'+(c.vehicle||'').replace(/"/g,'""')+'"','"'+(c.notes||'').replace(/"/g,'""')+'"',
-      '"'+entries.map(function(e){return e.name;}).join('|').replace(/"/g,'""')+'"',
-      '"'+entries.map(function(e){return e.date;}).join('|').replace(/"/g,'""')+'"',
-      c.inService?'1':'0','"'+visits+'"',c.createdAt||''].join(',');
+    return[c.id,q(c.name),q(c.phone),q(c.vehicle),q(c.notes),
+      q(entries.map(function(e){return e.name;}).join('|')),
+      q(entries.map(function(e){return e.date;}).join('|')),
+      c.inService?'1':'0',
+      q(JSON.stringify(c.visits||[])),
+      c.createdAt||''
+    ].join(',');
   });
-  var csv=[headers.join(',')].concat(rows).join('\n');
-  var blob=new Blob([''+csv],{type:'text/csv;charset=utf-8'});
+  var csv=headers+'\n'+rows.join('\n');
+  var blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
   var url=URL.createObjectURL(blob);
-  var a=document.createElement('a');a.href=url;
+  var a=document.createElement('a');
+  a.href=url;
   var d=new Date();
   a.download='carengo_'+d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0')+'-'+d.getDate().toString().padStart(2,'0')+'.csv';
-  a.click();URL.revokeObjectURL(url);
-  var now=new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('backup-info').textContent='Last export: today '+now;
-  showToast('CSV exported  '+clients.length+' clients ');
+  a.click();
+  URL.revokeObjectURL(url);
+  document.getElementById('backup-info').textContent='Last export: '+new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+  showToast('CSV exported - '+clients.length+' clients');
 }
-
 // CSV Import
 function importCSV(input){
   var file=input.files[0];if(!file)return;
