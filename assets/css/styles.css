@@ -1,0 +1,352 @@
+/* ===== Carengo Auto Repair — Design system ===== */
+:root {
+  --yellow: #F5A623;
+  --black: #111111;
+  --white: #FFFFFF;
+  --gray: #F4F4F4;
+  --text: #1a1a1a;
+
+  --max-width: 1100px;
+  --radius-pill: 999px;
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2.5rem;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text);
+  background-color: var(--white);
+  line-height: 1.5;
+  /* room for the sticky mobile call bar */
+  padding-bottom: 4.5rem;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+ul {
+  list-style: none;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-2);
+}
+
+/* ===== Buttons (pill style) ===== */
+.btn-pill {
+  display: inline-block;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.btn-pill:active {
+  transform: scale(0.97);
+}
+
+/* ===== Sticky header ===== */
+.site-header {
+  background-color: var(--black);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-2);
+  gap: var(--space-2);
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+}
+
+.btn-header-call {
+  background-color: var(--yellow);
+  color: var(--black);
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+/* ===== Hero ===== */
+.hero {
+  background-color: var(--black);
+  background-image: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+    url("../images/taller-frente.webp");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: var(--white);
+  padding: var(--space-4) 0;
+  text-align: center;
+}
+
+.hero-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.hero h1 {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--white);
+}
+
+.hero-sub {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--white);
+  max-width: 32rem;
+}
+
+.offer-badge {
+  background-color: var(--yellow);
+  color: var(--black);
+  font-weight: 700;
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.95rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+.btn-cta-large {
+  background-color: var(--yellow);
+  color: var(--black);
+  font-size: 1.1rem;
+  padding: 0.9rem 1.8rem;
+  margin-top: var(--space-1);
+}
+
+.hero-meta {
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: var(--white);
+  opacity: 0.9;
+}
+
+/* ===== Trust bar ===== */
+.trust-bar {
+  background-color: var(--gray);
+  padding: var(--space-2) 0;
+}
+
+.trust-bar-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ===== Services ===== */
+.services {
+  padding: var(--space-4) 0;
+}
+
+.services h2 {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: 0.4rem;
+  color: var(--text);
+}
+
+.services-sub {
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #555;
+  margin-bottom: var(--space-3);
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.service-card {
+  background-color: var(--white);
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.service-icon {
+  font-size: 1.8rem;
+}
+
+.service-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.service-card p {
+  font-size: 0.92rem;
+  font-weight: 400;
+  color: #555;
+}
+
+.btn-card-call {
+  background-color: var(--yellow);
+  color: var(--black);
+  font-size: 0.9rem;
+  padding: 0.65rem 1.2rem;
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+/* ===== Why choose us ===== */
+.why-choose {
+  background-color: var(--gray);
+  padding: var(--space-4) 0;
+}
+
+.why-choose-inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.why-choose-img {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.why-choose-content h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin-bottom: var(--space-2);
+  color: var(--text);
+  text-align: center;
+}
+
+.why-choose-list li {
+  padding: 0.4rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* ===== Sticky mobile call bar ===== */
+.mobile-call-bar {
+  display: block;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--yellow);
+  padding: 0.6rem var(--space-2);
+  z-index: 100;
+}
+
+.btn-mobile-call {
+  display: block;
+  width: 100%;
+  background-color: var(--black);
+  color: var(--white);
+  font-size: 1rem;
+  padding: 0.8rem 1rem;
+}
+
+/* ===== Tablet and up ===== */
+@media (min-width: 600px) {
+  .trust-bar-inner {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .hero h1 {
+    font-size: 2.4rem;
+  }
+
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===== Desktop ===== */
+@media (min-width: 900px) {
+  .hero h1 {
+    font-size: 2.9rem;
+  }
+
+  .services-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .why-choose-inner {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+  }
+
+  .why-choose-img {
+    max-width: 50%;
+  }
+
+  .why-choose-content h2 {
+    text-align: left;
+  }
+
+  /* mobile call bar is mobile-only */
+  .mobile-call-bar {
+    display: none;
+  }
+
+  body {
+    padding-bottom: 0;
+  }
+}
